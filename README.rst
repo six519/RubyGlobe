@@ -1,6 +1,6 @@
 HOW TO INSTALL
 --------------
-To install run ``gem install PyGlobe``
+To install run ``gem install RubyGlobe``
 
 
 EXAMPLE CODE
