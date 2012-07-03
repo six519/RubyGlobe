@@ -4,7 +4,6 @@
 * @email: ferdinandsilva@ferdinandsilva.com
 * @title: PyGlobe
 * @description: Ruby interface for Globe Labs API
-* @notes: sendMMS coming soon.. ;)
 ***********************************************
 =end
 
@@ -198,7 +197,7 @@ end
 
 class RubyGlobe
 
-		@@__VERSION__ = "1.1"
+		@@__VERSION__ = "1.2"
 		@@__AUTHOR__ = "Ferdinand E. Silva"
 		
 	def self.__VERSION__
@@ -231,40 +230,59 @@ class RubyGlobe
 	
 	end
 	
+	def translateMsg(ret)
+	
+		if ret == RubyGlobeReturnCode.SMS_ACCEPTED || ret == RubyGlobeReturnCode.MMS_ACCEPTED
+			return true
+		elsif ret == RubyGlobeReturnCode.NOT_ALLOWED
+			raise RubyGlobeServerFaultException, "User is not allowed to access this service"
+		elsif ret == RubyGlobeReturnCode.EXCEEDED_DAILY_CAP
+			raise RubyGlobeServerFaultException, "User exceeded daily cap"
+		elsif ret == RubyGlobeReturnCode.INVALID_MESSAGE_LENGTH
+			raise RubyGlobeServerFaultException, "Invalid message length"
+		elsif ret == RubyGlobeReturnCode.MAX_NUMBER_CONNECTION
+			raise RubyGlobeServerFaultException, "Maximum Number of simultaneous connections reached"
+		elsif ret == RubyGlobeReturnCode.INVALID_LOGIN_CREDENTIALS
+			raise RubyGlobeServerFaultException, "Invalid login credentials"
+		elsif ret == RubyGlobeReturnCode.SMS_SENDING_FAILED
+			raise RubyGlobeServerFaultException, "SMS sending failed"
+		elsif ret == RubyGlobeReturnCode.INVALID_TARGET
+				raise RubyGlobeServerFaultException, "Invalid target MSISDN"
+		elsif ret == RubyGlobeReturnCode.INVALID_DISPLAY
+				raise RubyGlobeServerFaultException, "Invalid display type"
+		elsif ret == RubyGlobeReturnCode.INVALID_MWI
+				raise RubyGlobeServerFaultException, "Invalid MWI"
+		elsif ret == RubyGlobeReturnCode.BAD_XML
+				raise RubyGlobeServerFaultException, "Badly formed XML in SOAP request"
+		elsif ret == RubyGlobeReturnCode.INVALID_CODING
+				raise RubyGlobeServerFaultException, "Invalid Coding"
+		elsif ret == RubyGlobeReturnCode.EMPTY_VALUE
+				raise RubyGlobeServerFaultException, "Empty value given in required argument"
+		elsif ret == RubyGlobeReturnCode.ARGUMENT_TOO_LARGE
+			raise RubyGlobeServerFaultException, "Argument given too large"
+		end
+	
+	end
+	
 	def sendSMS(message)
 		
 		begin
 			ret = @service.sendSMS(:uName => @uname, :uPin => @pin, :MSISDN => @msisdn, :messageString => message, :Display => @display, :udh => @udh, :mwi => @mwi, :coding => @coding).return.to_s
 			
-			if ret == RubyGlobeReturnCode.SMS_ACCEPTED
-				return true
-			elsif ret == RubyGlobeReturnCode.NOT_ALLOWED
-				raise RubyGlobeServerFaultException, "User is not allowed to access this service"
-			elsif ret == RubyGlobeReturnCode.EXCEEDED_DAILY_CAP
-				raise RubyGlobeServerFaultException, "User exceeded daily cap"
-			elsif ret == RubyGlobeReturnCode.INVALID_MESSAGE_LENGTH
-				raise RubyGlobeServerFaultException, "Invalid message length"
-			elsif ret == RubyGlobeReturnCode.MAX_NUMBER_CONNECTION
-				raise RubyGlobeServerFaultException, "Maximum Number of simultaneous connections reached"
-			elsif ret == RubyGlobeReturnCode.INVALID_LOGIN_CREDENTIALS
-				raise RubyGlobeServerFaultException, "Invalid login credentials"
-			elsif ret == RubyGlobeReturnCode.SMS_SENDING_FAILED
-				raise RubyGlobeServerFaultException, "SMS sending failed"
-			elsif ret == RubyGlobeReturnCode.INVALID_TARGET
-				raise RubyGlobeServerFaultException, "Invalid target MSISDN"
-			elsif ret == RubyGlobeReturnCode.INVALID_DISPLAY
-				raise RubyGlobeServerFaultException, "Invalid display type"
-			elsif ret == RubyGlobeReturnCode.INVALID_MWI
-				raise RubyGlobeServerFaultException, "Invalid MWI"
-			elsif ret == RubyGlobeReturnCode.BAD_XML
-				raise RubyGlobeServerFaultException, "Badly formed XML in SOAP request"
-			elsif ret == RubyGlobeReturnCode.INVALID_CODING
-				raise RubyGlobeServerFaultException, "Invalid Coding"
-			elsif ret == RubyGlobeReturnCode.EMPTY_VALUE
-				raise RubyGlobeServerFaultException, "Empty value given in required argument"
-			elsif ret == RubyGlobeReturnCode.ARGUMENT_TOO_LARGE
-				raise RubyGlobeServerFaultException, "Argument given too large"
-			end
+			return translateMsg ret
+			
+		rescue SocketError
+			raise RubyGlobeInvalidServiceException, "Service Unknown"
+		end
+		
+	end
+	
+	def sendMMS(subject, smil)
+		
+		begin
+			ret = @service.sendMMS(:uName => @uname, :uPin => @pin, :MSISDN => @msisdn, :subject => subject, :smil => smil).return.to_s
+			
+			return translateMsg ret
 			
 		rescue SocketError
 			raise RubyGlobeInvalidServiceException, "Service Unknown"

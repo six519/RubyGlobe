@@ -9,5 +9,5 @@ Gem::Specification.new do |s|
   s.summary = "Ruby interface for Globe Labs API"
   s.homepage = "http://ferdinandsilva.com"
   s.description = "Ruby interface for Globe Labs API"
-  s.files = ["README", "Changelog", "LICENSE", "demo.rb", "demo.conf", "lib/rubyglobe.rb"]
+  s.files = ["README.rst", "Changelog", "LICENSE", "demo.rb", "demo.conf", "lib/rubyglobe.rb"]
 end
